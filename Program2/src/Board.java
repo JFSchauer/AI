@@ -48,40 +48,52 @@ public class Board
   {
      if(row2 >= rows || row2 < 0) throw new InvalidMoveException();
      if(col2 >= cols || col2 < 0) throw new InvalidMoveException();
-     
+    
+
      int i = 0;
      int j = 0;
      for(; i < 8; ++i)
         if(pieces[i].getRow() == row1 && pieces[i].getCol() == col1) break;
      if(i == 8) throw new InvalidMoveException();
+
      Character name = pieces[i].getName();
      if(this.player == 0 && Character.isLowerCase(name)) throw new InvalidMoveException();
      if(this.player == 1 && Character.isUpperCase(name)) throw new InvalidMoveException();
      
+     if(col1 == -1 || col1 == cols)
+     {
+        this.placePiece(pieces[i], row2, col2);
+        return;
+     }  
 
      for(; j < 8; ++j)
        if(pieces[j].getRow() == row2 && pieces[j].getCol() == col2) break;
+     if(j != 8)
+     {
+        if(this.player == 0 && Character.isUpperCase(pieces[j].getName()))
+           throw new InvalidMoveException();
+        if(this.player == 1 && Character.isLowerCase(pieces[j].getName()))
+           throw new InvalidMoveException();
+        this.pieces[i].move(row2, col2);
+        if(pieces[j].getName() == 'L') whiteWins = true;
+        if(pieces[j].getName() == 'l') blackWins = true;
+     
+        pieces[j].captured();
+     }
+
+     if(pieces[0].getRow() == 0 && this.player == 1) blackWins = true;
+     if(pieces[1].getRow() == rows - 1 && this.player == 0) whiteWins = true;
+
      if(j == 8)
      {
        this.pieces[i].move(row2, col2);
-       this.player = (this.player + 1) % 2;
-       this.turn++;
-       return;
      }
-     if(this.player == 0 && Character.isUpperCase(pieces[j].getName()))
-        throw new InvalidMoveException();
-     if(this.player == 1 && Character.isLowerCase(pieces[j].getName()))
-        throw new InvalidMoveException();
-     if(pieces[j].getName() == 'L') whiteWins = true;
-     if(pieces[j].getName() == 'l') blackWins = true;
-     pieces[j].captured();
-     this.pieces[i].move(row2, col2);
+     
      this.player = (this.player + 1) % 2;
      this.turn++;
-     if(name == 'L' && row2 == rows - 1) blackWins = true;
-     if(name == 'l' && row2 == 0) whiteWins = true;
-     if(name == 'c' && row2 == 0) this.pieces[i].promote();
-     if(name == 'C' && row2 == rows - 1) this.pieces[i].promote();
+     
+     if(pieces[i].getName() == 'c' && row2 == rows - 1) this.pieces[i].promote();
+     if(pieces[i].getName() == 'C' && row2 == 0) this.pieces[i].promote();
      return;
   }
 
